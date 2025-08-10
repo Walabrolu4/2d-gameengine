@@ -13,6 +13,26 @@
       "-I./libs/lua",
       "-o",
       "gameengine",
+      "src/Game.cpp"
+    ],
+    "directory": "/Users/kaushik/Documents/_Projects/pikuma/2d-engine",
+    "file": "/Users/kaushik/Documents/_Projects/pikuma/2d-engine/src/Game.cpp",
+    "output": "/Users/kaushik/Documents/_Projects/pikuma/2d-engine/gameengine"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-std=c++17",
+      "-DSOL_NO_STD_OPTIMIZATIONS",
+      "-DSOL_ALL_SAFETIES_ON=1",
+      "-I/opt/homebrew/include/SDL2",
+      "-D_THREAD_SAFE",
+      "-I./libs",
+      "-I./libs/lua",
+      "-o",
+      "gameengine",
       "src/Main.cpp"
     ],
     "directory": "/Users/kaushik/Documents/_Projects/pikuma/2d-engine",
