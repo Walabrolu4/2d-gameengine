@@ -6,16 +6,17 @@
 #include <glm/glm.hpp>
 #include <iostream>
 
+#include "Logger.h"
 #include "SDL_timer.h"
 
-Game::Game() { std::cout << "Game constructor called \n"; }
+Game::Game() { Logger::Log("Game Constructor Called"); }
 
-Game::~Game() { std::cout << "Game destructor called\n"; }
+Game::~Game() { Logger::Log("Game Destructor Called"); }
 
 void Game::Init() {
   // INIT SDL
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-    std::cerr << "Error Initializing SDL." << std::endl;
+    Logger::Err("Error Initializing SDL.");
   }
 
   // Create Window
@@ -28,8 +29,7 @@ void Game::Init() {
                        windowWidth, windowHeight, 0);
 
   if (!window) {
-    std::cerr << "Error in creating a window. Please do better. Thank you"
-              << std::endl;
+    Logger::Err("Error in creating a window. Please do better. Thank you");
     return;
   }
 
@@ -37,9 +37,8 @@ void Game::Init() {
   renderer = SDL_CreateRenderer(window, -1, 0);
 
   if (!renderer) {
-    std::cerr
-        << "Errer in creating SDL Renderer. Please call your administrator"
-        << std::endl;
+    Logger::Err(
+        "Errer in creating SDL Renderer. Please call your administrator");
   }
   SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
   isRunning = true;
@@ -75,19 +74,25 @@ glm::vec2 playerPosition;
 glm::vec2 playerVelocity;
 void Game::Setup() {
   playerPosition = glm::vec2(10.0, 20.0);
-  playerVelocity = glm::vec2(1.0, 1.0);
+  playerVelocity = glm::vec2(10.0, 5.0);
 }
 
 void Game::Update() {
   // If we are too fast, waste some time until we reach the MILLISECS_PER_FRAME
-  while (!SDL_TICKS_PASSED(
-      SDL_GetTicks(), millisecondsForPreviousFrame + MILLISECONDS_PER_FRAME));
+  int timeToWait =
+      MILLISECONDS_PER_FRAME - (SDL_GetTicks() - millisecondsForPreviousFrame);
+
+  if (timeToWait > 0 && timeToWait <= MILLISECONDS_PER_FRAME) {
+    SDL_Delay(timeToWait);
+  }
+
+  double deltaTime = (SDL_GetTicks() - millisecondsForPreviousFrame) / 1000.0f;
 
   millisecondsForPreviousFrame = SDL_GetTicks();
   // std::cout << "frame time is " << millisecsPreviousFrame << ".\n";
 
-  playerPosition.x += playerVelocity.x;
-  playerPosition.y += playerVelocity.y;
+  playerPosition.x += playerVelocity.x * deltaTime;
+  playerPosition.y += playerVelocity.y * deltaTime;
 }
 
 void Game::Render() {
