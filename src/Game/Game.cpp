@@ -4,9 +4,8 @@
 #include <SDL_image.h>
 
 #include <glm/glm.hpp>
-#include <iostream>
 
-#include "Logger.h"
+#include "../Logger/Logger.h"
 #include "SDL_timer.h"
 
 Game::Game() { Logger::Log("Game Constructor Called"); }
