@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 
+#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "SDL_timer.h"
 
