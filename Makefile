@@ -25,7 +25,9 @@ INCLUDE_PATH = -I./libs -I./libs/lua $(LUA_INC)
 
 SRC_FILES = ./src/*.cpp \
 						./src/Game/*.cpp \
-						./src/Logger/*.cpp
+						./src/Logger/*.cpp \
+						./src/ECS/*.cpp
+
 
 LINKER_FLAGS = -L./libs $(LUA_LIB) -lSDL2_image $(SDL2)
 OBJECT_NAME = gameengine

@@ -14,12 +14,18 @@ const unsigned int MAX_COMPONENETS = 32;
 
 typedef std::bitset<MAX_COMPONENETS> Signature;
 
-class Component {
- private:
-  int id;
+struct IComponent {
+ protected:
+  static int nextId;
+};
 
- public:
-  int GetId() const;
+// Used to assign a uniqe id to a component type
+template <typename T>
+class Component : public IComponent {
+  static int GetId() {
+    static auto id = nextId++;
+    return id;
+  }
 };
 
 class Entity {
@@ -42,9 +48,20 @@ class System {
   void AddEntityToSystem(Entity entity);
   void RemoveEntityFromSystem(Entity entity);
   std::vector<Entity> GetSystemEntites() const;
-  Signature& GetComponentSignature() const;
+  const Signature& GetComponentSignature() const;
+
+  // Defines the componenet type that enteties must have to considered by the
+  // system.
+  template <typename TComponent>
+  void RequireComponent();
 };
 
 class Registry {};
+
+template <typename TComponent>
+void System::RequireComponent() {
+  const auto componentId = Component<TComponent>::GetId();
+  componentSignature.set(componentId);
+}
 
 #endif

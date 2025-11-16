@@ -75,6 +75,13 @@ glm::vec2 playerVelocity;
 void Game::Setup() {
   playerPosition = glm::vec2(10.0, 20.0);
   playerVelocity = glm::vec2(10.0, 5.0);
+
+  // Todo:
+  //  Create Entity Tank
+  //  Entity tank = registery.CreateEntity();
+  //  tank.AddComponent<TransformComponenet>();
+  //  tank.AddComponent<BoxColliderComponenet>();
+  //  tank.AddComponenet<SpriteComponenet>();
 }
 
 void Game::Update() {
