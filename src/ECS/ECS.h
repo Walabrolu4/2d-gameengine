@@ -34,7 +34,12 @@ class Entity {
 
  public:
   Entity(int id) : id(id) {};
+  Entity(const Entity& entity) = default;
   int GetId() const;
+
+  Entity& operator=(const Entity& other) = default;
+  bool operator==(const Entity& other) const { return id == other.GetId(); };
+  bool operator!=(const Entity& other) const { return id != other.GetId(); };
 };
 
 class System {
@@ -56,6 +61,7 @@ class System {
   void RequireComponent();
 };
 
+// It is a world manager.
 class Registry {};
 
 template <typename TComponent>
