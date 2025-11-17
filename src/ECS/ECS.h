@@ -1,6 +1,8 @@
 #ifndef ECS_H
 #define ECS_H
 #include <bitset>
+#include <typeindex>
+#include <unordered_map>
 #include <vector>
 
 const unsigned int MAX_COMPONENETS = 32;
@@ -13,20 +15,6 @@ const unsigned int MAX_COMPONENETS = 32;
 ///////////////////////////
 
 typedef std::bitset<MAX_COMPONENETS> Signature;
-
-struct IComponent {
- protected:
-  static int nextId;
-};
-
-// Used to assign a uniqe id to a component type
-template <typename T>
-class Component : public IComponent {
-  static int GetId() {
-    static auto id = nextId++;
-    return id;
-  }
-};
 
 class Entity {
  private:
@@ -61,8 +49,18 @@ class System {
   void RequireComponent();
 };
 
-// It is a world manager.
-class Registry {};
+struct IComponent {
+ protected:
+  static int nextId;
+};
+// Used to assign a uniqe id to a component type
+template <typename T>
+class Component : public IComponent {
+  static int GetId() {
+    static auto id = nextId++;
+    return id;
+  }
+};
 
 template <typename TComponent>
 void System::RequireComponent() {
@@ -70,4 +68,42 @@ void System::RequireComponent() {
   componentSignature.set(componentId);
 }
 
+class IPool {
+ public:
+  virtual ~IPool() {}
+};
+
+template <typename T>
+class Pool : IPool {
+ private:
+  std::vector<T> data;
+
+ public:
+  Pool(int size = 100) { data.resize(size); }
+  virtual ~Pool() = default;
+
+  bool isEmpty() const { return data.empty(); }
+  int GetSize() const { return data.size(); }
+  void Resize(int n) { data.resize(n); }
+  void Clear() { data.clear(); }
+  void Add(T object) { data.push_back(object); }
+  void Set(int index, T object) { data[index] = object; }
+  T& Get(int index) { return static_cast<T>(data[index]); }
+  T& operator[](unsigned int index) { return data[index]; }
+};
+
+// It is a world manager.
+class Registry {
+ private:
+  int numEntities = 0;
+  //[Vector index = component type id]
+  // [Pool index = entity id]
+  std::vector<IPool*> componentPools;
+  //[vector index = entity id]
+  std::vector<Signature> entityComponentSignatures;
+  std::unordered_map<std::type_index, System*> systems;
+
+ public:
+  Registry() = default;
+};
 #endif
