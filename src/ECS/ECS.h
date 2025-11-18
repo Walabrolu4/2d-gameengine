@@ -105,5 +105,16 @@ class Registry {
 
  public:
   Registry() = default;
+  // TODO :
+  // CreateEntity()
+  // DestroyEntity()
+  // AddComponent(Entity entity)
+  // RemoveComponent(Entity entity)
+  // bool HasComponent(Entity entity)
+  // Entity GetComponent (Entity entity)
+  // AddSystem()
+  // RemoveSystem()
+  // HasSystem()
+  // GetSystem()
 };
 #endif
