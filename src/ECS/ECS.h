@@ -1,7 +1,9 @@
 #ifndef ECS_H
 #define ECS_H
 #include <bitset>
+#include <set>
 #include <typeindex>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
@@ -103,18 +105,122 @@ class Registry {
   std::vector<Signature> entityComponentSignatures;
   std::unordered_map<std::type_index, System*> systems;
 
+  std::set<Entity> entitiesToBeAdded;
+  std::set<Entity> entitiesToBeKilled;
+
  public:
   Registry() = default;
-  // TODO :
-  // CreateEntity()
-  // DestroyEntity()
-  // AddComponent(Entity entity)
-  // RemoveComponent(Entity entity)
-  // bool HasComponent(Entity entity)
-  // Entity GetComponent (Entity entity)
-  // AddSystem()
-  // RemoveSystem()
-  // HasSystem()
-  // GetSystem()
+  Entity CreateEntity();
+  void KillEntity(Entity entity);
+  void Update();
+
+  // Component Management
+  template <typename TComponent, typename... TArgs>
+  void AddComponent(Entity entity, TArgs&&... args);
+
+  template <typename TComponent>
+  void RemoveComponent(Entity entity);
+
+  template <typename TComponent>
+  bool HasComponent(Entity entity) const;
+
+  template <typename TComponent>
+  TComponent& GetComponent(Entity entity) const;
+
+  // System Management
+  template <typename TSystem, typename... TArgs>
+  void AddSystem(TArgs&&... args);
+
+  template <typename TSystem>
+  void RemoveSystem();
+
+  template <typename TSystem>
+  bool HasSystem() const;
+
+  template <typename TSystem>
+  TSystem& GetSystem() const;
+
+  void AddEntityToSystems(Entity entity);
+
+  //  Entity Management
+  //  CreateEntity()
+  //  DestroyEntity()
 };
+
+// Component Implementations
+template <typename TComponent, typename... TArgs>
+void Registry::AddComponent(Entity entity, TArgs&&... args) {
+  const int componentId = Component<TComponent>::GetId();
+  const int entityId = entity.GetId();
+
+  // If the component pool isn't big enough resize.
+  if (componentId > componentPools.size()) {
+    componentPools.resize(componentId + 1, nullptr);
+  }
+
+  // If the compoent Pool is empty add a new Pool
+  if (!componentPools[componentId]) {
+    Pool<TComponent>* newComponentPool = new Pool<TComponent>();
+    componentPools[componentId] = newComponentPool;
+  }
+
+  Pool<TComponent>* componentPool =
+      Pool<TComponent>(componentPools[componentId]);
+
+  // If that specific componentPool is too small then resize it to have the
+  // current numEntities
+  if (entityId >= componentPool->GetSize()) {
+    componentPool->Resize(numEntities);
+  }
+
+  // create a new component and "forward" the arguments to it.
+  TComponent newComponent(std::forward<TArgs>(args)...);
+
+  // Finally set that component to "On" in the entities Component signatures
+  entityComponentSignatures[entityId].set(componentId);
+}
+
+template <typename TComponent>
+void Registry::RemoveComponent(Entity entity) {
+  const int componentId = Component<TComponent>::GetId();
+  const int entityId = entity.GetId();
+
+  entityComponentSignatures[entityId].set(componentId, false);
+}
+
+template <typename TComponent>
+bool Registry::HasComponent(Entity entity) const {
+  const int componentId = Component<TComponent>::GetId();
+  const int entityId = entity.GetId();
+  return entityComponentSignatures[entityId].test(componentId);
+}
+
+// System Implementations
+template <typename TSystem, typename... TArgs>
+void Registry::AddSystem(TArgs&&... args) {
+  TSystem* newSystem(new TSystem(std::forward<TArgs>(args)...));
+  systems.insert(std::make_pair(std::type_index(typeid(TSystem)), newSystem));
+}
+
+template <typename TSystem>
+void Registry::RemoveSystem() {
+  TSystem system = systems.find(std::type_index(typeid(TSystem)));
+  systems.erase(system);
+}
+
+template <typename TSystem>
+bool Registry::HasSystem() const {
+  return false;
+  TSystem system = system.find(std::type_index(typeid(TSystem)));
+
+  // If we didn't find the system them it should return the end pointer.
+  return system != systems.end();
+}
+
+template <typename TSystem>
+TSystem& Registry::GetSystem() const {
+  TSystem system = systems.find(std::type_index(typeid(TSystem)));
+  return *(std::static_pointer_cast<TSystem>(system->second));
+}
+
 #endif
